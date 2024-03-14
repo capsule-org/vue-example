@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="12">
         <v-card>
           <v-card-title>Create User</v-card-title>
           <v-card-text>
@@ -12,7 +12,9 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="12" md="6">
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="12">
         <v-card>
           <v-card-title>Verify Email</v-card-title>
           <v-card-text>
@@ -25,7 +27,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="12">
         <v-card>
           <v-card-title>Wallet Address</v-card-title>
           <v-card-text>
@@ -39,18 +41,18 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="12">
         <v-card>
           <v-card-title>Sign Message</v-card-title>
           <v-card-text>
             <v-form @submit.prevent="signMessage">
               <v-text-field v-model="message" label="Message" required></v-text-field>
-              <v-btn :loading="loadingMessage" type="submit" color="primary">Sign Message</v-btn>
+              <v-btn :loading="loadingSignMessage" type="submit" color="primary">Sign Message</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="12">
         <v-card>
           <v-card-title>Message Signature</v-card-title>
           <v-card-text>
@@ -58,7 +60,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="12">
         <v-card>
           <v-card-title>Login User</v-card-title>
           <v-card-text>
@@ -69,7 +71,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="12">
         <v-card>
           <v-card-title>Logout User</v-card-title>
           <v-card-text>
@@ -96,7 +98,7 @@ const capsule = new Capsule(
 const email = ref('');
 const verificationCode = ref('');
 const recoveryKey = ref('');
-const walletAddress = ref('');
+const walletAddress = ref<string | undefined>('');
 const message = ref('');
 const signature = ref('');
 
@@ -104,6 +106,7 @@ const loadingCreate = ref(false);
 const loadingVerifyEmail = ref(false);
 const loadingSignMessage = ref(false);
 const loadingLogin = ref(false);
+const loadingLogout = ref(false);
 
 async function createUser() {
   loadingCreate.value = true;
@@ -165,6 +168,14 @@ async function loginUser() {
 }
 
 async function logout() {
-  await capsule.logout();
+  loadingLogout.value = true;
+
+  try {
+    await capsule.logout();
+  } catch (e) {
+    console.error((e as Error).message);
+  } finally {
+    loadingLogout.value = false;
+  }
 }
 </script>
