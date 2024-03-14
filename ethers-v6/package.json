@@ -13,13 +13,15 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@usecapsule/web-sdk": "^0.35.1",
+    "@usecapsule/ethers-v6-integration": "1.3.0",
+    "@usecapsule/web-sdk": "1.3.0",
     "pinia": "^2.1.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5",
-    "vuera": "^0.2.7"
+    "vuera": "^0.2.7",
+    "vuetify": "^3.5.9"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.3.3",
@@ -34,9 +36,11 @@
     "eslint-plugin-vue": "^9.17.0",
     "npm-run-all2": "^6.1.1",
     "prettier": "^3.0.3",
+    "sass": "^1.72.0",
     "typescript": "~5.3.0",
     "vite": "^5.0.11",
     "vite-plugin-node-polyfills": "^0.21.0",
+    "vite-plugin-vuetify": "^2.0.3",
     "vue-tsc": "^1.8.27"
   }
 }

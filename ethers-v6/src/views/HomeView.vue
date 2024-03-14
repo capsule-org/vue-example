@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+import CapsuleButton from '../components/CapsuleButton.vue'
 </script>
 
 <template>
   <main>
-    <TheWelcome />
+    <v-app>
+      <CapsuleButton />
+    </v-app>
   </main>
 </template>
