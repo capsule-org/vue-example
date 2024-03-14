@@ -3,11 +3,11 @@
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-card-title>Register User</v-card-title>
+          <v-card-title>Create User</v-card-title>
           <v-card-text>
-            <v-form @submit.prevent="registerUser">
+            <v-form @submit.prevent="createUser">
               <v-text-field v-model="email" label="Email" required></v-text-field>
-              <v-btn :loading="loadingRegister" type="submit" color="primary">Register</v-btn>
+              <v-btn :loading="loadingCreate" type="submit" color="primary">Create User</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -27,9 +27,34 @@
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
+          <v-card-title>Wallet Address</v-card-title>
+          <v-card-text>
+            <code>{{ walletAddress }}</code>
+          </v-card-text>
+        </v-card>
+        <v-card>
           <v-card-title>Recovery Key</v-card-title>
           <v-card-text>
             <code>{{ recoveryKey }}</code>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-card>
+          <v-card-title>Sign Message</v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="signMessage">
+              <v-text-field v-model="message" label="Message" required></v-text-field>
+              <v-btn :loading="loadingMessage" type="submit" color="primary">Sign Message</v-btn>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-card>
+          <v-card-title>Message Signature</v-card-title>
+          <v-card-text>
+            <code>{{ signature }}</code>
           </v-card-text>
         </v-card>
       </v-col>
@@ -40,6 +65,16 @@
             <v-form @submit.prevent="loginUser">
               <v-text-field v-model="email" label="Email" required></v-text-field>
               <v-btn :loading="loadingLogin" type="submit" color="primary">Login</v-btn>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-card>
+          <v-card-title>Logout User</v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="logout">
+              <v-btn :loading="loadingLogout" type="submit" color="primary">Logout</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -55,30 +90,33 @@ import { ref } from 'vue';
 
 const capsule = new Capsule(
   Environment.DEVELOPMENT,
-  'd0b61c2c8865aaa2fb12886651627271'
+  'd0b61c2c8865aaa2fb12886651627271' // this is not sensitive so passing inline for simplicity
 );
 
-
-const recoveryKey = ref('');
-
 const email = ref('');
-const loadingRegister = ref(false);
+const verificationCode = ref('');
+const recoveryKey = ref('');
+const walletAddress = ref('');
+const message = ref('');
+const signature = ref('');
 
-async function registerUser() {
-  loadingRegister.value = true;
+const loadingCreate = ref(false);
+const loadingVerifyEmail = ref(false);
+const loadingSignMessage = ref(false);
+const loadingLogin = ref(false);
+
+async function createUser() {
+  loadingCreate.value = true;
 
   try {
     await capsule.logout();
     await capsule.createUser(email.value);
   } catch (e) {
-    error((e as Error).message);
+    console.error((e as Error).message);
   } finally {
-    loadingRegister.value = false;
+    loadingCreate.value = false;
   }
 }
-
-const verificationCode = ref('');
-const loadingVerifyEmail = ref(false);
 
 async function verifyEmail() {
   loadingVerifyEmail.value = true;
@@ -88,14 +126,27 @@ async function verifyEmail() {
     window.open(passkeyUrl, 'popup', 'width=575,height=820');
 
     recoveryKey.value = await capsule.waitForPasskeyAndCreateWallet();
+    walletAddress.value = Object.values(capsule.getWallets())[0].address;
   } catch (e) {
-    error((e as Error).message);
+    console.error((e as Error).message);
   } finally {
     loadingVerifyEmail.value = false;
   }
 }
 
-const loadingLogin = ref(false);
+async function signMessage() {
+  loadingSignMessage.value = true;
+
+  try {
+    const ethersSigner = new CapsuleEthersSigner(capsule)
+    signature.value = await ethersSigner.signMessage(message.value);
+  } catch (e) {
+    console.error((e as Error).message);
+  } finally {
+    loadingSignMessage.value = false;
+  }
+}
+
 async function loginUser() {
   loadingLogin.value = true;
 
@@ -105,12 +156,9 @@ async function loginUser() {
     window.open(passkeyUrl, 'popup', 'width=575,height=820');
 
     await capsule.waitForLoginAndSetup();
-
-    const signer = new CapsuleEthersSigner(capsule);
-    const signature = signer.signMessage('hello')
-    alert(signature);
+    walletAddress.value = Object.values(capsule.getWallets())[0].address;
   } catch (e) {
-    error((e as Error).message);
+    console.error((e as Error).message);
   } finally {
     loadingLogin.value = false;
   }
